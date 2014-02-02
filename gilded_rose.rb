@@ -16,53 +16,42 @@ class GildedRose
     @items << Item.new("Conjured Mana Cake", 3, 6)
   end
 
-  def update_quality
+  def update_quality  
+    items.each do |item|
+      item.sell_in -= 1 
 
-    for i in 0..(items.size-1)
-      if (items[i].name != "Aged Brie" && items[i].name != "Backstage passes to a TAFKAL80ETC concert")
-        if (items[i].quality > 0)
-          if (items[i].name != "Sulfuras, Hand of Ragnaros")
-            items[i].quality = items[i].quality - 1
-          end
+      if item.name == "Backstage passes to a TAFKAL80ETC concert"
+        if item.sell_in < 0 
+          item.quality = 0
+        elsif item.sell_in < 6
+          item.quality += 3
+        elsif item.sell_in < 10
+            item.quality += 2
+        else 
+            item.quality += 1
         end
+
+
+      elsif item.name == "Aged Brie" 
+        item.quality += 1 unless item.quality >= 50
+      elsif item.name == "Sulfuras, Hand of Ragnaros"
+        item.sell_in += 1
       else
-        if (items[i].quality < 50)
-          items[i].quality = items[i].quality + 1
-          if (items[i].name == "Backstage passes to a TAFKAL80ETC concert")
-            if (items[i].sell_in < 11)
-              if (items[i].quality < 50)
-                items[i].quality = items[i].quality + 1
-              end
-            end
-            if (items[i].sell_in < 6)
-              if (items[i].quality < 50)
-                items[i].quality = items[i].quality + 1
-              end
-            end
-          end
-        end
-      end
-      if (items[i].name != "Sulfuras, Hand of Ragnaros")
-        items[i].sell_in = items[i].sell_in - 1;
-      end
-      if (items[i].sell_in < 0)
-        if (items[i].name != "Aged Brie")
-          if (items[i].name != "Backstage passes to a TAFKAL80ETC concert")
-            if (items[i].quality > 0)
-              if (items[i].name != "Sulfuras, Hand of Ragnaros")
-                items[i].quality = items[i].quality - 1
-              end
-            end
-          else
-            items[i].quality = items[i].quality - items[i].quality
-          end
-        else
-          if (items[i].quality < 50)
-            items[i].quality = items[i].quality + 1
-          end
+        if item.sell_in < 0 
+          item.quality -= 2 unless item.quality == 0  
+        else 
+          item.quality -= 1 unless item.quality == 0  
         end
       end
     end
+  end
+end
+
+class Depreciator
+  attr_accessor :item
+  
+  def intialize item
+    @item = item
   end
 
 end

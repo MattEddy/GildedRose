@@ -1,4 +1,5 @@
-require './gilded_rose.rb'
+require File.expand_path("../gilded_rose", __FILE__)
+require "rspec"
 
 describe GildedRose do
 
@@ -42,6 +43,10 @@ describe GildedRose do
     context "Aged Brie" do
       let!(:item) { build_item("Aged Brie", 5, 5) }
 
+      it "ages" do
+        expect(item.sell_in).to equal(4)
+      end
+
       it "increases quality by 1 as it ages" do
         expect(item.quality).to equal(6)
       end
@@ -59,11 +64,11 @@ describe GildedRose do
       let!(:item) { build_item("Sulfuras, Hand of Ragnaros", 5, 5) }
 
       it "never ages" do
-        expect(item.quality).to eq 5
+        expect(item.sell_in).to eq 5
       end
 
       it "never changes in quality" do
-        expect(item.sell_in).to eq 5
+        expect(item.quality).to eq 5
       end
     end
 
