@@ -18,40 +18,91 @@ class GildedRose
 
   def update_quality  
     items.each do |item|
-      item.sell_in -= 1 
-
-      if item.name == "Backstage passes to a TAFKAL80ETC concert"
-        if item.sell_in < 0 
-          item.quality = 0
-        elsif item.sell_in < 6
-          item.quality += 3
-        elsif item.sell_in < 10
-            item.quality += 2
-        else 
-            item.quality += 1
-        end
-
-
-      elsif item.name == "Aged Brie" 
-        item.quality += 1 unless item.quality >= 50
-      elsif item.name == "Sulfuras, Hand of Ragnaros"
-        item.sell_in += 1
-      else
-        if item.sell_in < 0 
-          item.quality -= 2 unless item.quality == 0  
-        else 
-          item.quality -= 1 unless item.quality == 0  
-        end
-      end
+      AgingItem.build(item).depreciate
     end
   end
 end
 
-class Depreciator
-  attr_accessor :item
+class AgingItem
+  attr_reader :item
+
+  def self.build(item)
+    if item.name == "Backstage passes to a TAFKAL80ETC concert"
+      BackstagePass.new(item)
+    elsif item.name == "Aged Brie" 
+      AgedBrie.new(item)
+    elsif item.name == "Sulfuras, Hand of Ragnaros"
+      Sulfuras.new(item)
+    else
+      AgingItem.new(item)
+    end
+  end
   
-  def intialize item
+  def initialize(item)
     @item = item
   end
 
+  def depreciate
+    age
+    return if worthless?
+    item.sell_in < 0 ? decrease_quality(2) : decrease_quality(1)
+  end
+
+  private
+
+  def worthless?
+    item.quality == 0  
+  end
+
+  def age
+    item.sell_in -= 1
+  end
+
+  def decrease_quality(amount)
+    item.quality -= amount
+  end
+
+  def increase_quality(amount = 1)
+    item.quality += amount
+  end
+end
+
+class BackstagePass < AgingItem 
+  def depreciate
+    age
+    if item.sell_in < 0
+      void_worth 
+    elsif item.sell_in < 6
+      increase_quality(3)
+    elsif item.sell_in < 10
+      increase_quality(2)
+    else 
+      increase_quality(1)
+    end
+  end
+
+  private
+
+  def void_worth
+    item.quality = 0
+  end
+end
+
+class AgedBrie < AgingItem
+  def depreciate
+    age
+    increase_quality unless perfected?
+  end
+
+  private
+
+  def perfected?
+    item.quality >= 50
+  end
+end
+
+class Sulfuras < AgingItem
+  def depreciate
+    # No op
+  end
 end
