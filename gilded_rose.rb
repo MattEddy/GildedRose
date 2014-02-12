@@ -27,15 +27,7 @@ class AgingItem
   attr_reader :item
 
   def self.build(item)
-    if item.name == "Backstage passes to a TAFKAL80ETC concert"
-      BackstagePass.new(item)
-    elsif item.name == "Aged Brie" 
-      AgedBrie.new(item)
-    elsif item.name == "Sulfuras, Hand of Ragnaros"
-      Sulfuras.new(item)
-    else
-      AgingItem.new(item)
-    end
+    CONFIG.fetch(item.name, AgingItem).new(item)
   end
   
   def initialize(item)
@@ -51,7 +43,7 @@ class AgingItem
   private
 
   def worthless?
-    item.quality == 0  
+    item.quality == 0
   end
 
   def age
@@ -70,14 +62,12 @@ end
 class BackstagePass < AgingItem 
   def depreciate
     age
-    if item.sell_in < 0
-      void_worth 
-    elsif item.sell_in < 6
-      increase_quality(3)
-    elsif item.sell_in < 10
-      increase_quality(2)
-    else 
-      increase_quality(1)
+
+    case item.sell_in
+    when 0..5                then increase_quality(3)
+    when 6..9                then increase_quality(2) 
+    when 10..Float::INFINITY then increase_quality(1)
+    else void_worth
     end
   end
 
@@ -106,3 +96,9 @@ class Sulfuras < AgingItem
     # No op
   end
 end
+
+CONFIG = {
+  "Backstage passes to a TAFKAL80ETC concert" => BackstagePass, 
+  "Aged Brie" => AgedBrie,
+  "Sulfuras, Hand of Ragnaros" => Sulfuras
+}
