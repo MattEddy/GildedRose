@@ -105,5 +105,17 @@ describe GildedRose do
         end
       end
     end
+
+    context "Conjured items" do
+      let!(:item) { build_item("Conjured Item", 10, 10) }
+
+      it "ages" do
+        expect(item.sell_in).to equal 9
+      end
+
+      it "degrades in quality by two" do
+        expect(item.quality).to equal 8
+      end
+    end
   end
 end
